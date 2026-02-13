@@ -84,6 +84,23 @@
   border-bottom-width: 2px;
 }
 
+/* ── Help Button ── */
+.help-btn {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.help-btn:hover { background: rgba(63, 63, 70, 0.6); color: #e4e4e7; }
+
+/* ── Help Modal ── */
+.help-dialog {
+  animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 /* ── Fail Flash ── */
 @keyframes flashRed {
   0%, 100% { opacity: 0; }

@@ -295,7 +295,29 @@ $('centerBtn').addEventListener('pointerdown', () => {
 });
 
 document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeHelp(); return; }
   if (!accepting) return;
   const m = { q: 'green', w: 'red', a: 'yellow', s: 'blue' };
   if (m[e.key.toLowerCase()]) tap(m[e.key.toLowerCase()]);
+});
+
+/* ══════════════════════════════
+   § HELP MODAL
+   ══════════════════════════════ */
+const helpModal = $('helpModal');
+
+function openHelp() {
+  helpModal.classList.remove('hidden');
+  helpModal.classList.add('flex');
+}
+
+function closeHelp() {
+  helpModal.classList.add('hidden');
+  helpModal.classList.remove('flex');
+}
+
+$('helpBtn').addEventListener('pointerdown', openHelp);
+$('helpClose').addEventListener('pointerdown', closeHelp);
+helpModal.addEventListener('pointerdown', e => {
+  if (e.target === helpModal) closeHelp();
 });
