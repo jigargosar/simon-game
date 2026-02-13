@@ -206,6 +206,28 @@ function updateDisplay() {
 }
 
 /* ══════════════════════════════
+   § COUNTDOWN
+   ══════════════════════════════ */
+async function countdown() {
+  lockPads(true);
+  const allOn = () => COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.add(`lit-${M[c]}`));
+  const allOff = () => COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.remove(`lit-${M[c]}`));
+  const tones = [440, 550, 700];
+
+  for (let i = 0; i < 3; i++) {
+    if (!playing) return;
+    allOn();
+    playTone(tones[i], 100);
+    await sleep(120);
+    allOff();
+    await sleep(80);
+  }
+
+  if (!playing) return;
+  await sleep(300);
+}
+
+/* ══════════════════════════════
    § CELEBRATION
    ══════════════════════════════ */
 async function celebrate() {
@@ -320,7 +342,7 @@ async function startGame() {
   setCenterText('Stop');
   updateDisplay();
   setStatus('Get ready\u2026');
-  await sleep(800);
+  await countdown();
   if (!playing) return;
   addNote();
 }
