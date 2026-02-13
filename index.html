@@ -153,6 +153,10 @@ function playColor(c, dur = 350) {
   playTone(FREQS[c], dur);
 }
 
+function playClick() {
+  playTone(800, 80);
+}
+
 function playBuzz() {
   resumeAudio();
   const o = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -341,6 +345,7 @@ document.querySelectorAll('.pad').forEach(p =>
 
 $('centerBtn').addEventListener('click', () => {
   resumeAudio();
+  playClick();
   if (playing) stopGame(); else startGame();
 });
 
