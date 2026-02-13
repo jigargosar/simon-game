@@ -348,10 +348,34 @@ async function startGame() {
   addNote();
 }
 
-function stopGame() {
+async function stopGame() {
   playing = false;
   accepting = false;
   lockPads(true);
+
+  COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.add(`lit-${M[c]}`));
+
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  const lfo = audioCtx.createOscillator(), lfoGain = audioCtx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(600, audioCtx.currentTime);
+  o.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.6);
+  lfo.type = 'sine'; lfo.frequency.value = 8;
+  lfoGain.gain.value = 30;
+  lfo.connect(lfoGain); lfoGain.connect(o.frequency);
+  g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7);
+  o.connect(g); g.connect(audioCtx.destination);
+  lfo.start(); o.start();
+  o.stop(audioCtx.currentTime + 0.7); lfo.stop(audioCtx.currentTime + 0.7);
+
+  const order = ['yellow', 'blue', 'red', 'green'];
+  for (let i = 0; i < 4; i++) {
+    await sleep(150);
+    document.querySelector(`[data-color="${order[i]}"]`).classList.remove(`lit-${M[order[i]]}`);
+  }
+  await sleep(200);
+
   setCenterText('Start');
   $('round').textContent = '\u2014';
   $('step').textContent = '\u2014';
