@@ -210,21 +210,26 @@ function updateDisplay() {
    ══════════════════════════════ */
 async function countdown() {
   lockPads(true);
+  const order = ['green', 'red', 'blue', 'yellow'];
   const allOn = () => COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.add(`lit-${M[c]}`));
   const allOff = () => COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.remove(`lit-${M[c]}`));
-  const tones = [440, 550, 700];
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     if (!playing) return;
-    allOn();
-    playTone(tones[i], 100);
-    await sleep(120);
-    allOff();
+    const c = order[i];
+    const p = document.querySelector(`[data-color="${c}"]`);
+    p.classList.add(`lit-${M[c]}`);
+    playTone(330 + i * 80, 80);
     await sleep(80);
+    p.classList.remove(`lit-${M[c]}`);
   }
 
   if (!playing) return;
-  await sleep(300);
+  allOn();
+  playTone(880, 150);
+  await sleep(200);
+  allOff();
+  await sleep(500);
 }
 
 /* ══════════════════════════════
@@ -258,7 +263,7 @@ async function celebrate() {
 /* ══════════════════════════════
    § GAME STATE
    ══════════════════════════════ */
-const START_LEN = 7;
+const START_LEN = 2;
 let seq = [], pi = 0, round = 0, best = 0;
 let playing = false, accepting = false, curDur = 350;
 
