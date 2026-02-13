@@ -1,0 +1,92 @@
+@import 'tailwindcss';
+
+/* ── Theme ── */
+@theme {
+  --font-orb: 'Orbitron', sans-serif;
+  --font-chakra: 'Chakra Petch', sans-serif;
+
+  --color-g-lit: #00e676;
+  --color-g-dim: #007438;
+  --color-r-lit: #ff1744;
+  --color-r-dim: #73001e;
+  --color-b-lit: #2979ff;
+  --color-b-dim: #143d99;
+  --color-y-lit: #ffea00;
+  --color-y-dim: #736800;
+  --color-surf: #12121a;
+}
+
+/* ── Title Animation ── */
+@keyframes gradShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.grad-title {
+  background: linear-gradient(135deg, #00e676, #2979ff, #ff1744, #ffea00);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradShift 4s ease infinite;
+}
+
+/* ── Pad Depth ── */
+.pad {
+  border: none;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: filter 0.08s, transform 0.08s, background 0.08s, box-shadow 0.08s;
+  -webkit-tap-highlight-color: transparent;
+}
+.pad:active:not(.locked) {
+  transform: scale(0.96);
+  border-bottom-width: 2px;
+}
+
+/* ── Pad Glow (on wrapper, outside clip-path) ── */
+.pad-wrap { transition: filter 0.08s; }
+.glow-g { filter: drop-shadow(0 0 14px rgba(0, 230, 118, 0.4)); }
+.glow-r { filter: drop-shadow(0 0 14px rgba(255, 23, 68, 0.4)); }
+.glow-y { filter: drop-shadow(0 0 14px rgba(255, 234, 0, 0.4)); }
+.glow-b { filter: drop-shadow(0 0 14px rgba(41, 121, 255, 0.4)); }
+
+/* ── Pad Lit States ── */
+.lit-g {
+  background-color: #00e676 !important;
+  border-bottom-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 40px #00e676, 0 0 80px rgba(0, 230, 118, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+.lit-r {
+  background-color: #ff1744 !important;
+  border-bottom-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 40px #ff1744, 0 0 80px rgba(255, 23, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+.lit-y {
+  background-color: #ffea00 !important;
+  border-bottom-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 40px #ffea00, 0 0 80px rgba(255, 234, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+.lit-b {
+  background-color: #2979ff !important;
+  border-bottom-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 40px #2979ff, 0 0 80px rgba(41, 121, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ── Center Button Depth ── */
+.center-btn {
+  border: none;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: transform 0.08s;
+  -webkit-tap-highlight-color: transparent;
+}
+.center-btn:active {
+  scale: 0.95;
+  border-bottom-width: 2px;
+}
+
+/* ── Fail Flash ── */
+@keyframes flashRed {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+.flash { animation: flashRed 0.3s; }
