@@ -312,13 +312,16 @@ function tap(c) {
   if (++pi === seq.length) handleStepComplete();
 }
 
-function startGame() {
+async function startGame() {
   round = 1;
   seq = [];
   pi = 0;
   playing = true;
   setCenterText('Stop');
   updateDisplay();
+  setStatus('Get ready\u2026');
+  await sleep(800);
+  if (!playing) return;
   addNote();
 }
 
