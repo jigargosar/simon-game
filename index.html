@@ -205,6 +205,7 @@ function updateDisplay() {
    § COUNTDOWN
    ══════════════════════════════ */
 async function countdown() {
+  busy = true;
   lockPads(true);
   const order = ['green', 'red', 'blue', 'yellow'];
   const allOn = () => COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.add(`lit-${M[c]}`));
@@ -226,6 +227,7 @@ async function countdown() {
   await sleep(200);
   allOff();
   await sleep(500);
+  busy = false;
 }
 
 /* ══════════════════════════════
@@ -261,17 +263,18 @@ async function celebrate() {
    ══════════════════════════════ */
 const START_LEN = 2;
 let seq = [], pi = 0, round = 0, best = 0;
-let playing = false, accepting = false, curDur = 350;
+let playing = false, accepting = false, curDur = 350, busy = false;
 
 /* ══════════════════════════════
    § SEQUENCE PLAYBACK
    ══════════════════════════════ */
 async function playSequence() {
+  busy = true;
   lockPads(true);
   setStatus('Watch carefully\u2026');
   await sleep(600);
   curDur = 350;
-  const gap = 400;
+  const gap = 600;
   for (const c of seq) {
     if (!playing) return;
     lightPad(c, curDur);
@@ -281,6 +284,7 @@ async function playSequence() {
   lockPads(false);
   pi = 0;
   setStatus('Your turn \u2014 ' + seq.length + ' notes');
+  busy = false;
 }
 
 /* ══════════════════════════════
@@ -349,6 +353,7 @@ async function startGame() {
 }
 
 async function stopGame() {
+  busy = true;
   playing = false;
   accepting = false;
   lockPads(true);
@@ -380,6 +385,7 @@ async function stopGame() {
   $('round').textContent = '\u2014';
   $('step').textContent = '\u2014';
   setStatus('Press start to play');
+  busy = false;
 }
 
 /* ══════════════════════════════
@@ -395,6 +401,7 @@ document.querySelectorAll('.pad').forEach(p =>
 
 $('centerBtn').addEventListener('click', () => {
   resumeAudio();
+  if (busy) return;
   if (playing) stopGame(); else startGame();
 });
 
