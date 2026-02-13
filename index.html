@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>SIMON</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Chakra+Petch:wght@300;400;600&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { orb: ['Orbitron','sans-serif'], chakra: ['Chakra Petch','sans-serif'] },
+      colors: {
+        g: { lit: '#00e676', dim: '#004d25' },
+        r: { lit: '#ff1744', dim: '#4d0014' },
+        b: { lit: '#2979ff', dim: '#0d2766' },
+        y: { lit: '#ffea00', dim: '#4d4600' },
+        surf: '#12121a',
+      }
+    }
+  }
+}
+</script>
+<style>
+/* ── Title Animation ── */
+@keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+.grad-title { background:linear-gradient(135deg,#00e676,#2979ff,#ff1744,#ffea00); background-size:300% 300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:gradShift 4s ease infinite; }
+
+/* ── Pad Depth ── */
+.pad {
+  border: none;
+  border-bottom: 4px solid rgba(0,0,0,0.4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 8px rgba(0,0,0,0.5);
+  transition: filter 0.08s, transform 0.08s, background 0.08s, box-shadow 0.08s;
+  -webkit-tap-highlight-color: transparent;
+}
+.pad:active:not(.locked) { transform: scale(0.96); border-bottom-width: 2px; }
+
+/* ── Pad Lit States ── */
+.lit-g { background:#00e676 !important; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #00e676, 0 0 80px rgba(0,230,118,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+.lit-r { background:#ff1744 !important; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #ff1744, 0 0 80px rgba(255,23,68,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+.lit-y { background:#ffea00 !important; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #ffea00, 0 0 80px rgba(255,234,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+.lit-b { background:#2979ff !important; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #2979ff, 0 0 80px rgba(41,121,255,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+
+/* ── Center Button Depth ── */
+.center-btn {
+  border: none;
+  border-bottom: 4px solid rgba(0,0,0,0.4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 8px rgba(0,0,0,0.5);
+  transition: transform 0.08s;
+  -webkit-tap-highlight-color: transparent;
+}
+.center-btn:active { transform: translate(-50%,-50%) scale(0.95); border-bottom-width: 2px; }
+
+/* ── Fail Flash ── */
+@keyframes flashRed { 0%,100%{opacity:0} 50%{opacity:1} }
+.flash { animation:flashRed 0.3s; }
+</style>
+</head>
+
+<!-- ────────── LAYOUT ────────── -->
+<body class="bg-[#0a0a0f] h-dvh flex items-center justify-center font-chakra text-white select-none overflow-hidden">
+
+<div id="game" class="flex flex-col items-center justify-center gap-4 w-96 origin-center">
+
+  <!-- Title -->
+  <h1 class="font-orb font-black text-4xl tracking-widest grad-title leading-none">SIMON</h1>
+  <p class="text-xs tracking-widest text-zinc-600 uppercase -mt-2">Memory Game</p>
+
+  <!-- ScoreBar -->
+  <div id="scoreBar" class="flex gap-10">
+    <div class="text-center">
+      <div class="text-xs tracking-wider text-zinc-600 uppercase">Round</div>
+      <div class="font-orb font-bold text-xl tracking-widest text-zinc-200" id="round">&mdash;</div>
+    </div>
+    <div class="text-center">
+      <div class="text-xs tracking-wider text-zinc-600 uppercase">Step</div>
+      <div class="font-orb font-bold text-xl tracking-widest text-zinc-200" id="step">&mdash;</div>
+    </div>
+    <div class="text-center">
+      <div class="text-xs tracking-wider text-zinc-600 uppercase">Best</div>
+      <div class="font-orb font-bold text-xl tracking-widest text-zinc-200" id="best">&mdash;</div>
+    </div>
+  </div>
+
+  <!-- Board: clip-path pads with concave center cuts + center button -->
+  <div id="board" class="relative w-80 h-80">
+    <button class="pad absolute top-0 left-0 w-[48%] h-[48%] bg-g-dim cursor-pointer outline-none" data-color="green"
+      style="clip-path:path('M 76.8 0 L 141.6 0 A 12 12 0 0 1 153.6 12 L 153.6 107.6 A 52.8 52.8 0 0 0 107.6 153.6 L 12 153.6 A 12 12 0 0 1 0 141.6 L 0 76.8 A 76.8 76.8 0 0 1 76.8 0 Z')"></button>
+    <button class="pad absolute top-0 right-0 w-[48%] h-[48%] bg-r-dim cursor-pointer outline-none" data-color="red"
+      style="clip-path:path('M 12 0 L 76.8 0 A 76.8 76.8 0 0 1 153.6 76.8 L 153.6 141.6 A 12 12 0 0 1 141.6 153.6 L 46 153.6 A 52.8 52.8 0 0 0 0 107.6 L 0 12 A 12 12 0 0 1 12 0 Z')"></button>
+    <button class="pad absolute bottom-0 left-0 w-[48%] h-[48%] bg-y-dim cursor-pointer outline-none" data-color="yellow"
+      style="clip-path:path('M 12 0 L 107.6 0 A 52.8 52.8 0 0 0 153.6 46 L 153.6 141.6 A 12 12 0 0 1 141.6 153.6 L 76.8 153.6 A 76.8 76.8 0 0 1 0 76.8 L 0 12 A 12 12 0 0 1 12 0 Z')"></button>
+    <button class="pad absolute bottom-0 right-0 w-[48%] h-[48%] bg-b-dim cursor-pointer outline-none" data-color="blue"
+      style="clip-path:path('M 46 0 L 141.6 0 A 12 12 0 0 1 153.6 12 L 153.6 76.8 A 76.8 76.8 0 0 1 76.8 153.6 L 12 153.6 A 12 12 0 0 1 0 141.6 L 0 46 A 52.8 52.8 0 0 0 46 0 Z')"></button>
+    <!-- Center button -->
+    <button id="centerBtn" class="center-btn absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-zinc-800 cursor-pointer outline-none flex items-center justify-center z-10">
+      <span id="centerText" class="font-orb font-bold text-xs tracking-widest text-zinc-400 uppercase">Start</span>
+    </button>
+  </div>
+
+  <!-- Strict Toggle -->
+  <label id="strictToggle" class="flex items-center gap-1.5 cursor-pointer">
+    <input type="checkbox" id="strictMode" class="peer hidden">
+    <div class="w-8 h-4 rounded-full bg-zinc-800 relative transition-colors peer-checked:bg-r-dim after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:w-2.5 after:h-2.5 after:rounded-full after:bg-zinc-600 after:transition-all peer-checked:after:left-[19px] peer-checked:after:bg-r-lit peer-checked:after:shadow-[0_0_8px_#ff1744]"></div>
+    <span class="text-xs tracking-wider text-zinc-600 uppercase">Strict</span>
+  </label>
+
+  <!-- Status -->
+  <div class="text-sm tracking-wide text-zinc-600 min-h-4 text-center" id="status">Press start to play</div>
+</div>
+
+<!-- Flash Overlay -->
+<div class="fixed inset-0 bg-red-500/10 pointer-events-none opacity-0 z-50" id="flashOverlay"></div>
+
+<!-- ────────── SCRIPT ────────── -->
+<script>
+
+/* ══════════════════════════════
+   § SCALING
+   ══════════════════════════════ */
+function rescale() {
+  const g = document.getElementById('game');
+  const s = Math.min(innerWidth * 0.9 / g.offsetWidth, innerHeight * 0.9 / g.offsetHeight, 1.2);
+  g.style.transform = `scale(${s})`;
+}
+rescale();
+addEventListener('resize', rescale);
+
+/* ══════════════════════════════
+   § AUDIO
+   ══════════════════════════════ */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const FREQS = { green: 392, red: 330, blue: 523.25, yellow: 659.25 };
+
+function resumeAudio() {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTone(freq, dur = 350) {
+  resumeAudio();
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'sine';
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.35, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur / 1000);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + dur / 1000);
+}
+
+function playColor(c, dur = 350) {
+  playTone(FREQS[c], dur);
+}
+
+function playBuzz() {
+  resumeAudio();
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'sawtooth'; o.frequency.value = 80;
+  g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + 0.5);
+}
+
+/* ══════════════════════════════
+   § UI HELPERS
+   ══════════════════════════════ */
+const COLORS = ['green', 'red', 'blue', 'yellow'];
+const M = { green: 'g', red: 'r', blue: 'b', yellow: 'y' };
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function lightPad(c, dur = 350) {
+  const p = document.querySelector(`[data-color="${c}"]`);
+  p.classList.add(`lit-${M[c]}`);
+  playColor(c, dur);
+  setTimeout(() => p.classList.remove(`lit-${M[c]}`), dur);
+}
+
+function setStatus(text, type) {
+  $('status').textContent = text;
+  const color = type === 'fail' ? 'text-r-lit' : type === 'win' ? 'text-g-lit' : 'text-zinc-600';
+  $('status').className = `text-sm tracking-wide min-h-4 text-center ${color}`;
+}
+
+function lockPads(locked) {
+  document.querySelectorAll('.pad').forEach(p =>
+    locked ? p.classList.add('locked') : p.classList.remove('locked')
+  );
+  accepting = !locked;
+}
+
+function setCenterText(text) {
+  $('centerText').textContent = text;
+}
+
+function updateDisplay() {
+  $('round').textContent = round;
+  $('step').textContent = seq.length + ' / ' + (START_LEN + round - 1);
+  if (round > best) { best = round; $('best').textContent = best; }
+}
+
+/* ══════════════════════════════
+   § CELEBRATION
+   ══════════════════════════════ */
+async function celebrate() {
+  lockPads(true);
+  const sweep = ['green', 'red', 'yellow', 'blue'];
+  const tones = [392, 440, 523, 587, 659, 784, 880, 988];
+
+  for (let r = 0; r < 2; r++) {
+    for (let i = 0; i < 4; i++) {
+      const c = sweep[i];
+      const p = document.querySelector(`[data-color="${c}"]`);
+      p.classList.add(`lit-${M[c]}`);
+      playTone(tones[r * 4 + i], 150);
+      await sleep(120);
+      p.classList.remove(`lit-${M[c]}`);
+    }
+  }
+
+  for (let i = 0; i < 2; i++) {
+    COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.add(`lit-${M[c]}`));
+    playTone(1047, 200);
+    await sleep(200);
+    COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.remove(`lit-${M[c]}`));
+    await sleep(150);
+  }
+}
+
+/* ══════════════════════════════
+   § GAME STATE
+   ══════════════════════════════ */
+const START_LEN = 7;
+let seq = [], pi = 0, round = 0, best = 0;
+let playing = false, accepting = false, curDur = 350;
+
+/* ══════════════════════════════
+   § SEQUENCE PLAYBACK
+   ══════════════════════════════ */
+async function playSequence() {
+  lockPads(true);
+  setStatus('Watch carefully\u2026');
+  await sleep(600);
+  curDur = 350;
+  const gap = 400;
+  for (const c of seq) {
+    if (!playing) return;
+    lightPad(c, curDur);
+    await sleep(curDur + gap);
+  }
+  if (!playing) return;
+  lockPads(false);
+  pi = 0;
+  setStatus('Your turn \u2014 ' + seq.length + ' notes');
+}
+
+/* ══════════════════════════════
+   § GAME LOGIC
+   ══════════════════════════════ */
+function addNote() {
+  seq.push(COLORS[Math.floor(Math.random() * 4)]);
+  updateDisplay();
+  playSequence();
+}
+
+async function handleFail() {
+  accepting = false;
+  lockPads(true);
+  playBuzz();
+  const fl = $('flashOverlay');
+  fl.classList.add('flash');
+  fl.style.opacity = 1;
+  setStatus('Wrong!', 'fail');
+  setTimeout(() => { fl.classList.remove('flash'); fl.style.opacity = 0; }, 300);
+  await sleep(1200);
+  setStatus('Game over \u2014 reached Round ' + round, 'fail');
+  playing = false;
+  setCenterText('Start');
+}
+
+async function handleStepComplete() {
+  accepting = false;
+  lockPads(true);
+  const target = START_LEN + round - 1;
+
+  if (seq.length >= target) {
+    setStatus('Round ' + round + ' complete!', 'win');
+    await sleep(400);
+    await celebrate();
+    await sleep(600);
+    round++;
+    seq = [];
+    updateDisplay();
+    addNote();
+  } else {
+    setStatus('Correct!', 'win');
+    await sleep(600);
+    addNote();
+  }
+}
+
+function tap(c) {
+  if (!accepting) return;
+  lightPad(c, curDur);
+  if (c !== seq[pi]) { handleFail(); return; }
+  if (++pi === seq.length) handleStepComplete();
+}
+
+function startGame() {
+  round = 1;
+  seq = [];
+  pi = 0;
+  playing = true;
+  setCenterText('Stop');
+  updateDisplay();
+  addNote();
+}
+
+function stopGame() {
+  playing = false;
+  accepting = false;
+  lockPads(true);
+  setCenterText('Start');
+  $('round').textContent = '\u2014';
+  $('step').textContent = '\u2014';
+  setStatus('Press start to play');
+}
+
+/* ══════════════════════════════
+   § EVENT HANDLERS
+   ══════════════════════════════ */
+document.querySelectorAll('.pad').forEach(p =>
+  p.addEventListener('click', () => {
+    resumeAudio();
+    if (!playing) { lightPad(p.dataset.color, curDur); return; }
+    tap(p.dataset.color);
+  })
+);
+
+$('centerBtn').addEventListener('click', () => {
+  resumeAudio();
+  if (playing) stopGame(); else startGame();
+});
+
+document.addEventListener('keydown', e => {
+  if (!accepting) return;
+  const m = { q: 'green', w: 'red', a: 'yellow', s: 'blue' };
+  if (m[e.key.toLowerCase()]) tap(m[e.key.toLowerCase()]);
+});
+
+</script>
+</body>
+</html>
