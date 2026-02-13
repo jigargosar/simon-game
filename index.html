@@ -258,8 +258,11 @@ async function celebrate() {
    § GAME STATE
    ══════════════════════════════ */
 const START_LEN = 2;
+const oppSoundDuration = 350;
+const oppSilenceDuration = 600; // silence before each note
+const playerSoundDuration = 350;
 let seq = [], pi = 0, round = 0, best = 0;
-let playing = false, accepting = false, curDur = 350, busy = false;
+let playing = false, accepting = false, busy = false;
 
 /* ══════════════════════════════
    § SEQUENCE PLAYBACK
@@ -268,14 +271,11 @@ async function playSequence() {
   busy = true;
   lockPads(true);
   setStatus('Watch carefully\u2026');
-  const NOTE_INTERVAL = 950;
-  const noteDur = 350;
-  const pauseBefore = NOTE_INTERVAL - noteDur;
   for (const c of seq) {
     if (!playing) return;
-    await sleep(pauseBefore);
-    lightPad(c, noteDur);
-    await sleep(noteDur);
+    await sleep(oppSilenceDuration);
+    lightPad(c, oppSoundDuration);
+    await sleep(oppSoundDuration);
   }
   if (!playing) return;
   lockPads(false);
@@ -331,7 +331,7 @@ async function handleStepComplete() {
 
 function tap(c) {
   if (!accepting) return;
-  lightPad(c, curDur);
+  lightPad(c, playerSoundDuration);
   if (c !== seq[pi]) { handleFail(); return; }
   if (++pi === seq.length) handleStepComplete();
 }
@@ -391,7 +391,7 @@ async function stopGame() {
 document.querySelectorAll('.pad').forEach(p =>
   p.addEventListener('click', () => {
     resumeAudio();
-    if (!playing) { lightPad(p.dataset.color, curDur); return; }
+    if (!playing) { lightPad(p.dataset.color, playerSoundDuration); return; }
     tap(p.dataset.color);
   })
 );
