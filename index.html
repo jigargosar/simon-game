@@ -272,13 +272,14 @@ async function playSequence() {
   busy = true;
   lockPads(true);
   setStatus('Watch carefully\u2026');
-  await sleep(600);
-  curDur = 350;
-  const gap = 600;
+  const NOTE_INTERVAL = 950;
+  const noteDur = 350;
+  const pauseBefore = NOTE_INTERVAL - noteDur;
   for (const c of seq) {
     if (!playing) return;
-    lightPad(c, curDur);
-    await sleep(curDur + gap);
+    await sleep(pauseBefore);
+    lightPad(c, noteDur);
+    await sleep(noteDur);
   }
   if (!playing) return;
   lockPads(false);
