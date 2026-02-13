@@ -4,11 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0a0a0f">
-<meta name="description" content="Classic Simon memory game">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Classic Simon memory game — repeat increasingly complex sequences of colors and sounds">
+<meta name="format-detection" content="telephone=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SIMON">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SIMON — Memory Game">
+<meta property="og:description" content="Classic Simon memory game — repeat increasingly complex sequences of colors and sounds">
+<meta property="og:url" content="https://jigargosar.github.io/simon-game/">
+<meta property="og:image" content="https://jigargosar.github.io/simon-game/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:site_name" content="SIMON Game">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SIMON — Memory Game">
+<meta name="twitter:description" content="Classic Simon memory game — repeat increasingly complex sequences of colors and sounds">
+<meta name="twitter:image" content="https://jigargosar.github.io/simon-game/og-image.svg">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="manifest" href="manifest.json">
-<title>SIMON</title>
+<title>SIMON — Memory Game</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Chakra+Petch:wght@300;400;600&display=swap" rel="stylesheet">
 <script>
@@ -17,10 +33,10 @@ tailwind.config = {
     extend: {
       fontFamily: { orb: ['Orbitron','sans-serif'], chakra: ['Chakra Petch','sans-serif'] },
       colors: {
-        g: { lit: '#00e676', dim: '#004d25' },
-        r: { lit: '#ff1744', dim: '#4d0014' },
-        b: { lit: '#2979ff', dim: '#0d2766' },
-        y: { lit: '#ffea00', dim: '#4d4600' },
+        g: { lit: '#00e676', dim: '#007438' },
+        r: { lit: '#ff1744', dim: '#73001e' },
+        b: { lit: '#2979ff', dim: '#143d99' },
+        y: { lit: '#ffea00', dim: '#736800' },
         surf: '#12121a',
       }
     }
@@ -42,11 +58,18 @@ tailwind.config = {
 }
 .pad:active:not(.locked) { transform: scale(0.96); border-bottom-width: 2px; }
 
+/* ── Pad Glow (on wrapper, outside clip-path) ── */
+.pad-wrap { transition: filter 0.08s; }
+.glow-g { filter: drop-shadow(0 0 14px rgba(0,230,118,0.4)); }
+.glow-r { filter: drop-shadow(0 0 14px rgba(255,23,68,0.4)); }
+.glow-y { filter: drop-shadow(0 0 14px rgba(255,234,0,0.4)); }
+.glow-b { filter: drop-shadow(0 0 14px rgba(41,121,255,0.4)); }
+
 /* ── Pad Lit States ── */
-.lit-g { background:#00e676 !important; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #00e676, 0 0 80px rgba(0,230,118,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
-.lit-r { background:#ff1744 !important; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #ff1744, 0 0 80px rgba(255,23,68,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
-.lit-y { background:#ffea00 !important; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #ffea00, 0 0 80px rgba(255,234,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
-.lit-b { background:#2979ff !important; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #2979ff, 0 0 80px rgba(41,121,255,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+.lit-g { background-color:#00e676 !important; --tw-bg-opacity:1; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #00e676, 0 0 80px rgba(0,230,118,0.3), inset 0 1px 0 rgba(255,255,255,0.15) !important; }
+.lit-r { background-color:#ff1744 !important; --tw-bg-opacity:1; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #ff1744, 0 0 80px rgba(255,23,68,0.3), inset 0 1px 0 rgba(255,255,255,0.15) !important; }
+.lit-y { background-color:#ffea00 !important; --tw-bg-opacity:1; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #ffea00, 0 0 80px rgba(255,234,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15) !important; }
+.lit-b { background-color:#2979ff !important; --tw-bg-opacity:1; border-bottom-color:rgba(0,0,0,0.3); box-shadow:0 0 40px #2979ff, 0 0 80px rgba(41,121,255,0.3), inset 0 1px 0 rgba(255,255,255,0.15) !important; }
 
 /* ── Center Button Depth ── */
 .center-btn {
@@ -91,14 +114,22 @@ tailwind.config = {
 
   <!-- Board: clip-path pads with concave center cuts + center button -->
   <div id="board" class="relative w-80 h-80">
-    <button class="pad absolute top-0 left-0 w-[48%] h-[48%] bg-g-dim cursor-pointer outline-none" data-color="green"
-      style="clip-path:path('M 76.8 0 L 141.6 0 A 12 12 0 0 1 153.6 12 L 153.6 107.6 A 52.8 52.8 0 0 0 107.6 153.6 L 12 153.6 A 12 12 0 0 1 0 141.6 L 0 76.8 A 76.8 76.8 0 0 1 76.8 0 Z')"></button>
-    <button class="pad absolute top-0 right-0 w-[48%] h-[48%] bg-r-dim cursor-pointer outline-none" data-color="red"
-      style="clip-path:path('M 12 0 L 76.8 0 A 76.8 76.8 0 0 1 153.6 76.8 L 153.6 141.6 A 12 12 0 0 1 141.6 153.6 L 46 153.6 A 52.8 52.8 0 0 0 0 107.6 L 0 12 A 12 12 0 0 1 12 0 Z')"></button>
-    <button class="pad absolute bottom-0 left-0 w-[48%] h-[48%] bg-y-dim cursor-pointer outline-none" data-color="yellow"
-      style="clip-path:path('M 12 0 L 107.6 0 A 52.8 52.8 0 0 0 153.6 46 L 153.6 141.6 A 12 12 0 0 1 141.6 153.6 L 76.8 153.6 A 76.8 76.8 0 0 1 0 76.8 L 0 12 A 12 12 0 0 1 12 0 Z')"></button>
-    <button class="pad absolute bottom-0 right-0 w-[48%] h-[48%] bg-b-dim cursor-pointer outline-none" data-color="blue"
-      style="clip-path:path('M 46 0 L 141.6 0 A 12 12 0 0 1 153.6 12 L 153.6 76.8 A 76.8 76.8 0 0 1 76.8 153.6 L 12 153.6 A 12 12 0 0 1 0 141.6 L 0 46 A 52.8 52.8 0 0 0 46 0 Z')"></button>
+    <div class="pad-wrap absolute top-0 left-0 w-[48%] h-[48%]">
+      <button class="pad w-full h-full bg-g-dim cursor-pointer outline-none" data-color="green"
+        style="clip-path:path('M 76.8 0 L 141.6 0 A 12 12 0 0 1 153.6 12 L 153.6 107.6 A 52.8 52.8 0 0 0 107.6 153.6 L 12 153.6 A 12 12 0 0 1 0 141.6 L 0 76.8 A 76.8 76.8 0 0 1 76.8 0 Z')"></button>
+    </div>
+    <div class="pad-wrap absolute top-0 right-0 w-[48%] h-[48%]">
+      <button class="pad w-full h-full bg-r-dim cursor-pointer outline-none" data-color="red"
+        style="clip-path:path('M 12 0 L 76.8 0 A 76.8 76.8 0 0 1 153.6 76.8 L 153.6 141.6 A 12 12 0 0 1 141.6 153.6 L 46 153.6 A 52.8 52.8 0 0 0 0 107.6 L 0 12 A 12 12 0 0 1 12 0 Z')"></button>
+    </div>
+    <div class="pad-wrap absolute bottom-0 left-0 w-[48%] h-[48%]">
+      <button class="pad w-full h-full bg-y-dim cursor-pointer outline-none" data-color="yellow"
+        style="clip-path:path('M 12 0 L 107.6 0 A 52.8 52.8 0 0 0 153.6 46 L 153.6 141.6 A 12 12 0 0 1 141.6 153.6 L 76.8 153.6 A 76.8 76.8 0 0 1 0 76.8 L 0 12 A 12 12 0 0 1 12 0 Z')"></button>
+    </div>
+    <div class="pad-wrap absolute bottom-0 right-0 w-[48%] h-[48%]">
+      <button class="pad w-full h-full bg-b-dim cursor-pointer outline-none" data-color="blue"
+        style="clip-path:path('M 46 0 L 141.6 0 A 12 12 0 0 1 153.6 12 L 153.6 76.8 A 76.8 76.8 0 0 1 76.8 153.6 L 12 153.6 A 12 12 0 0 1 0 141.6 L 0 46 A 52.8 52.8 0 0 0 46 0 Z')"></button>
+    </div>
     <!-- Center button -->
     <button id="centerBtn" class="center-btn absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-zinc-800 cursor-pointer outline-none flex items-center justify-center z-10">
       <span id="centerText" class="font-orb font-bold text-xs tracking-widest text-zinc-400 uppercase">Start</span>
@@ -172,11 +203,22 @@ const M = { green: 'g', red: 'r', blue: 'b', yellow: 'y' };
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-function lightPad(c, dur = 350) {
+function padOn(c) {
   const p = document.querySelector(`[data-color="${c}"]`);
   p.classList.add(`lit-${M[c]}`);
+  p.parentElement.classList.add(`glow-${M[c]}`);
+}
+
+function padOff(c) {
+  const p = document.querySelector(`[data-color="${c}"]`);
+  p.classList.remove(`lit-${M[c]}`);
+  p.parentElement.classList.remove(`glow-${M[c]}`);
+}
+
+function lightPad(c, dur = 350) {
+  padOn(c);
   playTone(FREQS[c], dur);
-  setTimeout(() => p.classList.remove(`lit-${M[c]}`), dur);
+  setTimeout(() => padOff(c), dur);
 }
 
 function setStatus(text, type) {
@@ -209,17 +251,16 @@ async function countdown() {
   busy = true;
   lockPads(true);
   const order = ['green', 'red', 'blue', 'yellow'];
-  const allOn = () => COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.add(`lit-${M[c]}`));
-  const allOff = () => COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.remove(`lit-${M[c]}`));
+  const allOn = () => COLORS.forEach(c => padOn(c));
+  const allOff = () => COLORS.forEach(c => padOff(c));
 
   for (let i = 0; i < 4; i++) {
     if (!playing) return;
     const c = order[i];
-    const p = document.querySelector(`[data-color="${c}"]`);
-    p.classList.add(`lit-${M[c]}`);
+    padOn(c);
     playTone(330 + i * 80, 80);
     await sleep(80);
-    p.classList.remove(`lit-${M[c]}`);
+    padOff(c);
   }
 
   if (!playing) return;
@@ -242,19 +283,18 @@ async function celebrate() {
   for (let r = 0; r < 2; r++) {
     for (let i = 0; i < 4; i++) {
       const c = sweep[i];
-      const p = document.querySelector(`[data-color="${c}"]`);
-      p.classList.add(`lit-${M[c]}`);
+      padOn(c);
       playTone(tones[r * 4 + i], 150);
       await sleep(120);
-      p.classList.remove(`lit-${M[c]}`);
+      padOff(c);
     }
   }
 
   for (let i = 0; i < 2; i++) {
-    COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.add(`lit-${M[c]}`));
+    COLORS.forEach(c => padOn(c));
     playTone(1047, 200);
     await sleep(200);
-    COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.remove(`lit-${M[c]}`));
+    COLORS.forEach(c => padOff(c));
     await sleep(150);
   }
 }
@@ -360,7 +400,7 @@ async function stopGame() {
   accepting = false;
   lockPads(true);
 
-  COLORS.forEach(c => document.querySelector(`[data-color="${c}"]`).classList.add(`lit-${M[c]}`));
+  COLORS.forEach(c => padOn(c));
 
   const o = audioCtx.createOscillator(), g = audioCtx.createGain();
   const lfo = audioCtx.createOscillator(), lfoGain = audioCtx.createGain();
@@ -379,7 +419,7 @@ async function stopGame() {
   const order = ['yellow', 'blue', 'red', 'green'];
   for (let i = 0; i < 4; i++) {
     await sleep(150);
-    document.querySelector(`[data-color="${order[i]}"]`).classList.remove(`lit-${M[order[i]]}`);
+    padOff(order[i]);
   }
   await sleep(200);
 
@@ -394,14 +434,14 @@ async function stopGame() {
    § EVENT HANDLERS
    ══════════════════════════════ */
 document.querySelectorAll('.pad').forEach(p =>
-  p.addEventListener('click', () => {
+  p.addEventListener('pointerdown', () => {
     resumeAudio();
     if (!playing) { lightPad(p.dataset.color, playerSoundDuration); return; }
     tap(p.dataset.color);
   })
 );
 
-$('centerBtn').addEventListener('click', () => {
+$('centerBtn').addEventListener('pointerdown', () => {
   resumeAudio();
   if (busy) return;
   if (playing) stopGame(); else startGame();

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>SIMON</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Chakra+Petch:wght@300;400;600&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { orb: ['Orbitron','sans-serif'], chakra: ['Chakra Petch','sans-serif'] },
+      colors: {
+        g: { lit: '#00e676', dim: '#004d25' },
+        r: { lit: '#ff1744', dim: '#4d0014' },
+        b: { lit: '#2979ff', dim: '#0d2766' },
+        y: { lit: '#ffea00', dim: '#4d4600' },
+        surf: '#12121a',
+      }
+    }
+  }
+}
+</script>
+<style>
+  @keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+  .grad-title { background:linear-gradient(135deg,#00e676,#2979ff,#ff1744,#ffea00); background-size:300% 300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:gradShift 4s ease infinite; }
+  .lit-g { background:#00e676; box-shadow:0 0 40px #00e676,0 0 80px rgba(0,230,118,0.3); }
+  .lit-r { background:#ff1744; box-shadow:0 0 40px #ff1744,0 0 80px rgba(255,23,68,0.3); }
+  .lit-y { background:#ffea00; box-shadow:0 0 40px #ffea00,0 0 80px rgba(255,234,0,0.3); }
+  .lit-b { background:#2979ff; box-shadow:0 0 40px #2979ff,0 0 80px rgba(41,121,255,0.3); }
+  @keyframes flashRed { 0%,100%{opacity:0} 50%{opacity:1} }
+  .flash { animation:flashRed 0.3s; }
+</style>
+</head>
+<body class="bg-[#0a0a0f] h-dvh flex items-center justify-center font-chakra text-white select-none overflow-hidden">
+
+<div id="game" class="flex flex-col items-center justify-center gap-4 w-96 origin-center">
+
+  <h1 class="font-orb font-black text-4xl tracking-widest grad-title leading-none">SIMON</h1>
+  <p class="text-xs tracking-widest text-zinc-600 uppercase -mt-2">Memory Game</p>
+
+  <div class="flex gap-10">
+    <div class="text-center">
+      <div class="text-xs tracking-wider text-zinc-600 uppercase">Round</div>
+      <div class="font-orb font-bold text-xl text-zinc-200" id="round">—</div>
+    </div>
+    <div class="text-center">
+      <div class="text-xs tracking-wider text-zinc-600 uppercase">Step</div>
+      <div class="font-orb font-bold text-xl text-zinc-200" id="step">—</div>
+    </div>
+    <div class="text-center">
+      <div class="text-xs tracking-wider text-zinc-600 uppercase">Best</div>
+      <div class="font-orb font-bold text-xl text-zinc-200" id="best">—</div>
+    </div>
+  </div>
+
+  <!-- Board -->
+  <div class="relative w-80 h-80">
+    <button class="pad absolute top-0 left-0 w-[48%] h-[48%] bg-g-dim border-none cursor-pointer outline-none rounded-[50%_12px_12px_12px] transition-all duration-75 active:scale-95" data-color="green"></button>
+    <button class="pad absolute top-0 right-0 w-[48%] h-[48%] bg-r-dim border-none cursor-pointer outline-none rounded-[12px_50%_12px_12px] transition-all duration-75 active:scale-95" data-color="red"></button>
+    <button class="pad absolute bottom-0 left-0 w-[48%] h-[48%] bg-y-dim border-none cursor-pointer outline-none rounded-[12px_12px_12px_50%] transition-all duration-75 active:scale-95" data-color="yellow"></button>
+    <button class="pad absolute bottom-0 right-0 w-[48%] h-[48%] bg-b-dim border-none cursor-pointer outline-none rounded-[12px_12px_50%_12px] transition-all duration-75 active:scale-95" data-color="blue"></button>
+    <!-- Center hub -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-surf border-2 border-zinc-800 flex flex-col items-center justify-center z-10">
+      <button id="centerBtn" class="w-10 h-10 rounded-md bg-zinc-800 border-2 border-zinc-600 cursor-pointer hover:border-zinc-400 hover:bg-zinc-700 transition-all active:scale-90 flex items-center justify-center">
+        <svg class="w-4 h-4 text-zinc-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="text-xs tracking-wide text-zinc-600 uppercase mt-1" id="centerLabel">Start</div>
+    </div>
+  </div>
+
+  <!-- Strict toggle -->
+  <label class="flex items-center gap-1.5 cursor-pointer">
+    <input type="checkbox" id="strictMode" class="peer hidden">
+    <div class="w-8 h-4 rounded-full bg-zinc-800 relative transition-colors peer-checked:bg-r-dim after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:w-2.5 after:h-2.5 after:rounded-full after:bg-zinc-600 after:transition-all peer-checked:after:left-[19px] peer-checked:after:bg-r-lit peer-checked:after:shadow-[0_0_8px_#ff1744]"></div>
+    <span class="text-xs tracking-wider text-zinc-600 uppercase">Strict</span>
+  </label>
+
+  <div class="text-sm tracking-wide text-zinc-600 min-h-4 text-center" id="status">Press center to play</div>
+</div>
+
+<!-- Flash overlay -->
+<div class="fixed inset-0 bg-red-500/10 pointer-events-none opacity-0 z-50" id="flashOverlay"></div>
+
+<script>
+// ── Scale ──
+function rescale() {
+  const game = document.getElementById('game');
+  const s = Math.min(window.innerWidth * 0.9 / game.offsetWidth, window.innerHeight * 0.9 / game.offsetHeight, 1.2);
+  game.style.transform = `scale(${s})`;
+}
+rescale();
+window.addEventListener('resize', rescale);
+
+// ── Audio ──
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const FREQS = { green:392, red:330, blue:523.25, yellow:659.25 };
+const COLORS = ['green','red','blue','yellow'];
+const M = { green:'g', red:'r', blue:'b', yellow:'y' };
+
+function playTone(freq, dur=350) {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type='sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.35, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur/1000);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + dur/1000);
+}
+
+function playColor(c, dur=350) { playTone(FREQS[c], dur); }
+
+function playBuzz() {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type='sawtooth'; o.frequency.value=80;
+  g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + 0.5);
+}
+
+// ── Game State ──
+const START_LEN = 7;
+let seq=[], pi=0, round=0, best=0, playing=false, accepting=false, curDur=350;
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function light(c, dur=350) {
+  const p = document.querySelector(`[data-color="${c}"]`);
+  p.classList.remove(`bg-${M[c]}-dim`);
+  p.classList.add(`lit-${M[c]}`);
+  playColor(c, dur);
+  setTimeout(()=>{ p.classList.remove(`lit-${M[c]}`); p.classList.add(`bg-${M[c]}-dim`); }, dur);
+}
+
+function setStatus(t, c) {
+  $('status').textContent = t;
+  $('status').className = `text-sm tracking-wide min-h-4 text-center ${c==='fail'?'text-r-lit':c==='win'?'text-g-lit':'text-zinc-600'}`;
+}
+
+function lock(l) {
+  document.querySelectorAll('.pad').forEach(p => l ? p.classList.add('locked') : p.classList.remove('locked'));
+  accepting = !l;
+}
+
+function showCenterBtn(show) {
+  $('centerBtn').style.display = show ? 'flex' : 'none';
+  $('centerLabel').style.display = show ? 'block' : 'none';
+}
+
+function updateDisplay() {
+  $('round').textContent = round;
+  $('step').textContent = seq.length + '/' + (START_LEN + round - 1);
+  if (round > best) { best = round; $('best').textContent = best; }
+}
+
+// ── Celebration ──
+async function celebrate() {
+  lock(true);
+  const sweep = ['green','red','yellow','blue'];
+
+  // 2 clockwise sweeps with ascending tones
+  const tones = [392, 440, 523, 587, 659, 784, 880, 988];
+  for (let r = 0; r < 2; r++) {
+    for (let i = 0; i < 4; i++) {
+      const c = sweep[i];
+      const p = document.querySelector(`[data-color="${c}"]`);
+      p.classList.remove(`bg-${M[c]}-dim`);
+      p.classList.add(`lit-${M[c]}`);
+      playTone(tones[r * 4 + i], 150);
+      await sleep(120);
+      p.classList.remove(`lit-${M[c]}`);
+      p.classList.add(`bg-${M[c]}-dim`);
+    }
+  }
+
+  // All flash together twice
+  for (let i = 0; i < 2; i++) {
+    COLORS.forEach(c => {
+      const p = document.querySelector(`[data-color="${c}"]`);
+      p.classList.remove(`bg-${M[c]}-dim`);
+      p.classList.add(`lit-${M[c]}`);
+    });
+    playTone(1047, 200);
+    await sleep(200);
+    COLORS.forEach(c => {
+      const p = document.querySelector(`[data-color="${c}"]`);
+      p.classList.remove(`lit-${M[c]}`);
+      p.classList.add(`bg-${M[c]}-dim`);
+    });
+    await sleep(150);
+  }
+}
+
+// ── Sequence Playback ──
+async function playSeq() {
+  lock(true);
+  showCenterBtn(false);
+  setStatus('Watch carefully…');
+  await sleep(600);
+  curDur = 350;
+  const gap = 400;
+  for (const c of seq) { light(c, curDur); await sleep(curDur + gap); }
+  lock(false);
+  pi = 0;
+  setStatus('Your turn — ' + seq.length + ' notes');
+}
+
+// ── Handlers ──
+async function handleFail() {
+  accepting = false;
+  lock(true);
+  playBuzz();
+  const fl = $('flashOverlay');
+  fl.classList.add('flash');
+  fl.style.opacity = 1;
+  setStatus('Wrong!', 'fail');
+  setTimeout(()=>{ fl.classList.remove('flash'); fl.style.opacity = 0; }, 300);
+  await sleep(1200);
+  setStatus('Game over — reached Round ' + round, 'fail');
+  playing = false;
+  showCenterBtn(true);
+  $('centerLabel').textContent = 'Retry';
+}
+
+async function handleStepComplete() {
+  accepting = false;
+  lock(true);
+  const target = START_LEN + round - 1;
+
+  if (seq.length >= target) {
+    // Round complete!
+    setStatus('Round ' + round + ' complete!', 'win');
+    await sleep(400);
+    await celebrate();
+    await sleep(600);
+    // Start next round
+    round++;
+    seq = [];
+    updateDisplay();
+    // Add first note of new round
+    addNote();
+  } else {
+    // Add next note to sequence
+    setStatus('Correct!', 'win');
+    await sleep(600);
+    addNote();
+  }
+}
+
+function addNote() {
+  seq.push(COLORS[Math.floor(Math.random() * 4)]);
+  updateDisplay();
+  playSeq();
+}
+
+function tap(c) {
+  if (!accepting) return;
+  light(c, curDur);
+  if (c !== seq[pi]) { handleFail(); return; }
+  if (++pi === seq.length) handleStepComplete();
+}
+
+function startGame() {
+  round = 1;
+  seq = [];
+  pi = 0;
+  playing = true;
+  showCenterBtn(false);
+  updateDisplay();
+  addNote();
+}
+
+// ── Events ──
+document.querySelectorAll('.pad').forEach(p => p.addEventListener('click', () => {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!playing) { light(p.dataset.color, curDur); return; }
+  tap(p.dataset.color);
+}));
+
+$('centerBtn').addEventListener('click', () => {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  startGame();
+});
+
+document.addEventListener('keydown', e => {
+  if (!accepting) return;
+  const m = { q:'green', w:'red', a:'yellow', s:'blue' };
+  if (m[e.key.toLowerCase()]) tap(m[e.key.toLowerCase()]);
+});
+</script>
+</body>
+</html>

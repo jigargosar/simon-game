@@ -1,15 +1,21 @@
 {
   "name": "SIMON — Memory Game",
   "short_name": "SIMON",
+  "description": "Classic Simon memory game — repeat increasingly complex sequences of colors and sounds",
   "start_url": ".",
+  "id": "/simon-game/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#0a0a0f",
+  "categories": ["games"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
