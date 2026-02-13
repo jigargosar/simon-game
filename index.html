@@ -149,10 +149,6 @@ function playTone(freq, dur = 350) {
   o.start(); o.stop(audioCtx.currentTime + dur / 1000);
 }
 
-function playColor(c, dur = 350) {
-  playTone(FREQS[c], dur);
-}
-
 function playBuzz() {
   resumeAudio();
   const o = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -174,7 +170,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 function lightPad(c, dur = 350) {
   const p = document.querySelector(`[data-color="${c}"]`);
   p.classList.add(`lit-${M[c]}`);
-  playColor(c, dur);
+  playTone(FREQS[c], dur);
   setTimeout(() => p.classList.remove(`lit-${M[c]}`), dur);
 }
 
