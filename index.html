@@ -34,7 +34,7 @@
 <div id="game" class="relative flex flex-col items-center justify-center gap-4 w-96 origin-center">
 
   <!-- Help Button -->
-  <button id="helpBtn" class="center-btn absolute top-0 right-0 w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 font-orb text-sm cursor-pointer outline-none flex items-center justify-center z-10">?</button>
+  <button id="helpBtn" class="raised center-btn absolute top-0 right-0 w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 font-orb text-sm cursor-pointer outline-none flex items-center justify-center z-10">?</button>
 
   <!-- Title -->
   <h1 class="font-orb font-black text-4xl tracking-widest grad-title leading-none">SIMON</h1>
@@ -59,23 +59,23 @@
   <!-- Board: clip-path pads with concave center cuts + center button -->
   <div id="board" class="relative w-80 h-80">
     <div class="pad-wrap absolute top-0 left-0 w-[48%] h-[48%]">
-      <button class="pad w-full h-full bg-g-dim cursor-pointer outline-none" data-color="green"
+      <button class="raised pad w-full h-full bg-g-dim cursor-pointer outline-none" data-color="green"
         style="clip-path:path('M 76.8 0 L 141.6 0 A 12 12 0 0 1 153.6 12 L 153.6 107.6 A 52.8 52.8 0 0 0 107.6 153.6 L 12 153.6 A 12 12 0 0 1 0 141.6 L 0 76.8 A 76.8 76.8 0 0 1 76.8 0 Z')"></button>
     </div>
     <div class="pad-wrap absolute top-0 right-0 w-[48%] h-[48%]">
-      <button class="pad w-full h-full bg-r-dim cursor-pointer outline-none" data-color="red"
+      <button class="raised pad w-full h-full bg-r-dim cursor-pointer outline-none" data-color="red"
         style="clip-path:path('M 12 0 L 76.8 0 A 76.8 76.8 0 0 1 153.6 76.8 L 153.6 141.6 A 12 12 0 0 1 141.6 153.6 L 46 153.6 A 52.8 52.8 0 0 0 0 107.6 L 0 12 A 12 12 0 0 1 12 0 Z')"></button>
     </div>
     <div class="pad-wrap absolute bottom-0 left-0 w-[48%] h-[48%]">
-      <button class="pad w-full h-full bg-y-dim cursor-pointer outline-none" data-color="yellow"
+      <button class="raised pad w-full h-full bg-y-dim cursor-pointer outline-none" data-color="yellow"
         style="clip-path:path('M 12 0 L 107.6 0 A 52.8 52.8 0 0 0 153.6 46 L 153.6 141.6 A 12 12 0 0 1 141.6 153.6 L 76.8 153.6 A 76.8 76.8 0 0 1 0 76.8 L 0 12 A 12 12 0 0 1 12 0 Z')"></button>
     </div>
     <div class="pad-wrap absolute bottom-0 right-0 w-[48%] h-[48%]">
-      <button class="pad w-full h-full bg-b-dim cursor-pointer outline-none" data-color="blue"
+      <button class="raised pad w-full h-full bg-b-dim cursor-pointer outline-none" data-color="blue"
         style="clip-path:path('M 46 0 L 141.6 0 A 12 12 0 0 1 153.6 12 L 153.6 76.8 A 76.8 76.8 0 0 1 76.8 153.6 L 12 153.6 A 12 12 0 0 1 0 141.6 L 0 46 A 52.8 52.8 0 0 0 46 0 Z')"></button>
     </div>
     <!-- Center button -->
-    <button id="centerBtn" class="center-btn absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-zinc-800 cursor-pointer outline-none flex items-center justify-center z-10">
+    <button id="centerBtn" class="raised center-btn absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-zinc-800 cursor-pointer outline-none flex items-center justify-center z-10">
       <span id="centerText" class="font-orb font-bold text-xs tracking-widest text-zinc-400 uppercase">Start</span>
     </button>
   </div>

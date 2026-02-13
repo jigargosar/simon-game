@@ -46,20 +46,23 @@ function playBuzz() {
    § UI HELPERS
    ══════════════════════════════ */
 const COLORS = ['green', 'red', 'blue', 'yellow'];
-const M = { green: 'g', red: 'r', blue: 'b', yellow: 'y' };
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+function getPad(c) {
+  return document.querySelector('[data-color="' + c + '"]');
+}
+
 function padOn(c) {
-  const p = document.querySelector(`[data-color="${c}"]`);
-  p.classList.add(`lit-${M[c]}`);
-  p.parentElement.classList.add(`glow-${M[c]}`);
+  const p = getPad(c);
+  p.classList.add('lit');
+  p.parentElement.classList.add('glow');
 }
 
 function padOff(c) {
-  const p = document.querySelector(`[data-color="${c}"]`);
-  p.classList.remove(`lit-${M[c]}`);
-  p.parentElement.classList.remove(`glow-${M[c]}`);
+  const p = getPad(c);
+  p.classList.remove('lit');
+  p.parentElement.classList.remove('glow');
 }
 
 function lightPad(c, dur = 350) {
