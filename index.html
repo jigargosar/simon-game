@@ -31,7 +31,10 @@
 <!-- ────────── LAYOUT ────────── -->
 <body class="bg-[#0a0a0f] h-dvh flex items-center justify-center font-chakra text-white select-none overflow-hidden touch-none">
 
-<div id="game" class="flex flex-col items-center justify-center gap-4 w-96 origin-center">
+<div id="game" class="relative flex flex-col items-center justify-center gap-4 w-96 origin-center">
+
+  <!-- Help Button -->
+  <button id="helpBtn" class="center-btn absolute top-0 right-0 w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 font-orb text-sm cursor-pointer outline-none flex items-center justify-center z-10">?</button>
 
   <!-- Title -->
   <h1 class="font-orb font-black text-4xl tracking-widest grad-title leading-none">SIMON</h1>
@@ -86,6 +89,50 @@
 
   <!-- Status -->
   <div class="text-sm tracking-wide text-zinc-600 min-h-4 text-center" id="status">Press start to play</div>
+</div>
+
+<!-- Help Overlay -->
+<div id="helpOverlay" class="fixed inset-0 bg-black/70 z-40 flex items-center justify-center hidden">
+  <div class="max-w-sm w-full bg-zinc-900 rounded-2xl p-6 border border-zinc-800 relative mx-4">
+    <button id="helpClose" class="absolute top-4 right-4 text-zinc-500 text-lg cursor-pointer outline-none leading-none">&times;</button>
+    <h2 class="font-orb text-lg tracking-widest grad-title mb-4">HOW TO PLAY</h2>
+
+    <div class="flex flex-col gap-3 text-sm text-zinc-400">
+      <!-- Goal -->
+      <div>
+        <div class="text-xs text-zinc-200 uppercase tracking-wider mb-1">Goal</div>
+        Repeat the color sequence. Each round adds more notes. Survive as long as you can.
+      </div>
+
+      <!-- Controls -->
+      <div>
+        <div class="text-xs text-zinc-200 uppercase tracking-wider mb-1">Controls</div>
+        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+          <span>Click/Tap pads</span><span>Play color</span>
+          <span><kbd class="bg-zinc-800 rounded px-1.5 py-0.5 font-mono">Q</kbd> Green</span><span>top-left</span>
+          <span><kbd class="bg-zinc-800 rounded px-1.5 py-0.5 font-mono">W</kbd> Red</span><span>top-right</span>
+          <span><kbd class="bg-zinc-800 rounded px-1.5 py-0.5 font-mono">A</kbd> Yellow</span><span>bottom-left</span>
+          <span><kbd class="bg-zinc-800 rounded px-1.5 py-0.5 font-mono">S</kbd> Blue</span><span>bottom-right</span>
+        </div>
+      </div>
+
+      <!-- Scoring -->
+      <div>
+        <div class="text-xs text-zinc-200 uppercase tracking-wider mb-1">Scoring</div>
+        <div class="flex flex-col gap-0.5">
+          <span><strong class="text-zinc-200">Round</strong> — current round number</span>
+          <span><strong class="text-zinc-200">Step</strong> — notes played / notes needed</span>
+          <span><strong class="text-zinc-200">Best</strong> — highest round this session</span>
+        </div>
+      </div>
+
+      <!-- Strict Mode -->
+      <div>
+        <div class="text-xs text-zinc-200 uppercase tracking-wider mb-1">Strict Mode</div>
+        When enabled, any mistake ends the game immediately. When off, the sequence replays after an error.
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Flash Overlay -->

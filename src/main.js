@@ -295,7 +295,22 @@ $('centerBtn').addEventListener('pointerdown', () => {
 });
 
 document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (k === '?' || k === 'h') { if (!playing) toggleHelp(); return; }
   if (!accepting) return;
   const m = { q: 'green', w: 'red', a: 'yellow', s: 'blue' };
-  if (m[e.key.toLowerCase()]) tap(m[e.key.toLowerCase()]);
+  if (m[k]) tap(m[k]);
+});
+
+/* ══════════════════════════════
+   § HELP OVERLAY
+   ══════════════════════════════ */
+function toggleHelp() {
+  $('helpOverlay').classList.toggle('hidden');
+}
+
+$('helpBtn').addEventListener('pointerdown', toggleHelp);
+$('helpClose').addEventListener('pointerdown', toggleHelp);
+$('helpOverlay').addEventListener('pointerdown', e => {
+  if (e.target === $('helpOverlay')) toggleHelp();
 });
