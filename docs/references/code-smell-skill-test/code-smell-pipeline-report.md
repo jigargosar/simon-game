@@ -51,41 +51,47 @@ Location: `~/.claude/skills/code-smell-audit/SKILL.md`
 
 This was added because the skeptic kept excusing lying names by saying "the coupling is intentional" — answering "is this reasonable?" instead of "does the name communicate what happens?"
 
-## Results: 3 Runs on Simon Game (src/main.js, ~330 lines)
+## Results: 4 Runs on Simon Game (src/main.js, ~330 lines)
 
 ### Findings surfaced by auditor
 - Run 1: 14 findings
 - Run 2: 13 findings
 - Run 3: 14 findings
+- Run 4: 14 findings (post-nudge)
 
 Mostly overlapping but not identical. Auditor is appropriately noisy.
 
 ### Executor decisions across runs
 
-| Finding | Run 1 | Run 2 | Run 3 |
-|---|---|---|---|
-| countdown `order` = COLORS | Accept | Accept | Accept |
-| redundant `accepting=false` before lockPads | Accept | Accept | Accept |
-| lockPads accepting mutation (lying name) | Accept | Reject | Reject |
-| updateDisplay mutates best (lying name) | Reject | Accept | Reject |
-| allPadsOn/allPadsOff extraction | Accept | Not surfaced | Accept (inline) |
-| stopGame `order` as COLORS reversed | Not surfaced | Accept | Accept |
-| setStatus className rebuild | Reject | Accept | Reject |
-| playBuzz merge into playTone | Reject | Reject | Accept |
-| keydown map hoisting | Not surfaced | Not surfaced | Accept |
-| addNote naming | Reject | Reject | Reject |
-| celebrate sweep order | Reject | Reject | Reject |
-| stopGame inline sound extraction | Reject | Reject | Reject |
+| Finding | Run 1 | Run 2 | Run 3 | Run 4 (post-nudge) |
+|---|---|---|---|---|
+| countdown `order` = COLORS | Accept | Accept | Accept | Accept |
+| redundant `accepting=false` before lockPads | Accept | Accept | Accept | Accept (via lockPads fix) |
+| lockPads accepting mutation (lying name) | Accept | Reject | Reject | Accept |
+| updateDisplay mutates best (lying name) | Reject | Accept | Reject | Accept |
+| allPadsOn/allPadsOff extraction | Accept | Not surfaced | Accept (inline) | Not surfaced |
+| stopGame `order` as COLORS reversed | Not surfaced | Accept | Accept | Not surfaced |
+| setStatus className rebuild | Reject | Accept | Reject | Reject |
+| playBuzz merge into playTone | Reject | Reject | Accept | Reject |
+| keydown map hoisting | Not surfaced | Not surfaced | Accept | Not surfaced |
+| stopGame display reset | Not surfaced | Not surfaced | Not surfaced | Accept |
+| addNote naming | Reject | Reject | Reject | Reject |
+| celebrate sweep order | Reject | Reject | Reject | Reject |
+| stopGame inline sound extraction | Reject | Reject | Reject | Reject |
 
 ### Consistency analysis
 
-**Rock solid (3/3 accept):** countdown `order`, redundant `accepting=false`
-**Consistently rejected (3/3 reject):** addNote naming, celebrate sweep, stopGame sound
-**Noisy (varies):** lockPads lying name, updateDisplay lying name, allPads extraction, setStatus, playBuzz merge
+**Rock solid (4/4 accept):** countdown `order`, redundant `accepting=false`
+
+**Stabilized after nudge (2/4 → 4/4 pattern):** lockPads lying name, updateDisplay lying name — both flipped from inconsistent to accepted after the lying-name nudge was added
+
+**Consistently rejected (4/4 reject):** addNote naming, celebrate sweep, stopGame sound
+
+**Noisy (varies):** allPads extraction, setStatus, playBuzz merge, stopGame display reset
 
 ### Conclusion
 
-Multi-pass reveals what's real. The intersection of accepted findings across runs represents high-confidence improvements. The variance in lying-name detection motivated the skeptic nudge — to be validated on other codebases before further tuning.
+Multi-pass reveals what's real. The intersection of accepted findings across runs represents high-confidence improvements. The lying-name nudge stabilized the two most important borderline findings — lockPads and updateDisplay — without being project-specific. To be validated on other codebases before further tuning.
 
 ## Plumbing Lessons
 
@@ -94,6 +100,7 @@ Multi-pass reveals what's real. The intersection of accepted findings across run
 3. **`;` vs `&&`:** PowerShell 5 doesn't support `&&`. Use `;` (runs regardless) for now. `&&` (run on success) needs PowerShell 7+.
 4. **Progress visibility:** The `;` two-command structure gives free progress — audit.log is readable while executor runs. Single-pipe (`|`) only shows executor output.
 5. **Executor reads real source:** Even when fed findings about a test file, the executor went to `src/main.js` using project context. This is correct behavior for real runs.
+6. **Auditor paraphrases template:** Even with "copy the following template" instruction, the auditor sometimes rewrites the skeptic instructions. The nudge may not always reach the executor via the audit output. Consider adding critical rules to the stage 2 `-p` prompt as backup.
 
 ## Parked Items
 
@@ -107,4 +114,4 @@ Multi-pass reveals what's real. The intersection of accepted findings across run
 
 - Skill: `~/.claude/skills/code-smell-audit/SKILL.md`
 - Test project: `C:\Users\jigar\projects\simon-game\`
-- Logs: `audit-{1,2,3}.log`, `executor-{1,2,3}.log` in simon-game directory
+- Logs: `audit-{1,2,3,4}.log`, `executor-{1,2,3,4}.log` in simon-game directory
